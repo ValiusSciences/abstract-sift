@@ -6,8 +6,6 @@ import math
 from contextlib import contextmanager
 from email.utils import parsedate_to_datetime
 import json
-import os
-from pathlib import Path
 import random
 import time
 import uuid
@@ -29,6 +27,11 @@ class HTTPFailure(Exception):
     def __init__(self, status, retry_after=0):
         super().__init__(f"HTTP {status}")
         self.status, self.retry_after = status, retry_after
+
+    @property
+    def transient(self):
+        # Includes CDN gateway codes (520-524) seen in front of provider APIs.
+        return self.status in (408, 429) or 500 <= self.status <= 599
 
 
 class Transport:
@@ -467,8 +470,7 @@ async def evaluate(store, run_id, allowance, transport, progress=lambda x: None)
                         if fatal:
                             halted[name] = True
                         retryable = response is None and (
-                            not isinstance(exc, HTTPFailure)
-                            or exc.status in (429, 500, 502, 503, 504, 529)
+                            not isinstance(exc, HTTPFailure) or exc.transient
                         )
                         if fatal or not retryable or ordinal == cfg["retries"]:
                             progress(

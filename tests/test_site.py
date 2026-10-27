@@ -1,11 +1,24 @@
 import asyncio
+from importlib.resources import files
 import json
 from pathlib import Path
 import re
+import sqlite3
 import unittest
+from unittest.mock import patch
 import test_sift
 from abstract_sift.engine import evaluate
 from abstract_sift.site import build_site
+
+
+def embedded(text):
+    return json.loads(
+        re.search(
+            r'<script id="explorer-data" type="application/json">(.*?)</script>',
+            text,
+            re.S,
+        ).group(1)
+    )
 
 
 class SiteTests(unittest.TestCase):
@@ -18,7 +31,7 @@ class SiteTests(unittest.TestCase):
         run = self.run_case(
             rows=[test_sift.item("a", malicious), test_sift.item("missing", "")]
         )
-        other = self.run_case(rows=[test_sift.item("other", "PRIVATE OTHER RUN")])
+        self.run_case(rows=[test_sift.item("other", "PRIVATE OTHER RUN")])
         asyncio.run(evaluate(self.store, run, 10000000, test_sift.FakeTransport()))
         path = Path(self.tmp.name) / "export.html"
         result = build_site(
@@ -72,3 +85,38 @@ class SiteTests(unittest.TestCase):
         self.assertFalse((Path(self.tmp.name) / "bad.html").exists())
         with self.assertRaises(ValueError):
             build_site(self.store, run, Path(self.tmp.name) / "db.sqlite")
+
+    def test_changed_ui_asset_fails_instead_of_emitting_broken_page(self):
+        run = self.run_case(providers=["openai"])
+        web = Path(self.tmp.name) / "package" / "web"
+        web.mkdir(parents=True)
+        source = files("abstract_sift").joinpath("web")
+        for name in ("index.html", "style.css", "format.js", "scatter.js", "app.js"):
+            text = source.joinpath(name).read_text(encoding="utf-8")
+            if name == "app.js":
+                text = text.replace("fetch('data.json')", "fetch('snapshot.json')")
+            (web / name).write_text(text, encoding="utf-8")
+        path = Path(self.tmp.name) / "stale.html"
+        with (
+            patch("abstract_sift.site.files", lambda _: web.parent),
+            self.assertRaises(ValueError) as caught,
+        ):
+            build_site(self.store, run, path)
+        self.assertIn("update site.py", str(caught.exception))
+        self.assertFalse(path.exists())
+
+    def test_snapshot_ignores_uncommitted_scoring_writes(self):
+        run = self.run_case([test_sift.item("a")], providers=["openai"])
+        writer = sqlite3.connect(self.store.path)
+        writer.execute("BEGIN IMMEDIATE")
+        writer.execute(
+            "UPDATE results SET status='ok',probability=0.99 WHERE run=?", (run,)
+        )
+        path = Path(self.tmp.name) / "during.html"
+        try:
+            build_site(self.store, run, path)
+        finally:
+            writer.rollback()
+            writer.close()
+        record = embedded(path.read_text())["metadata"]["records"][0]
+        self.assertEqual((record["openai"], record["openai_status"]), (None, "queued"))

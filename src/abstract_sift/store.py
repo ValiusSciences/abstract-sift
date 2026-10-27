@@ -2,7 +2,6 @@
 
 import csv
 import json
-import os
 from pathlib import Path
 import sqlite3
 import time
@@ -24,7 +23,8 @@ class Store:
     def __init__(self, directory):
         self.directory = Path(directory).expanduser().resolve()
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self.db = sqlite3.connect(self.directory / "sift.sqlite", timeout=30)
+        self.path = self.directory / "sift.sqlite"
+        self.db = sqlite3.connect(self.path, timeout=30)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.executescript(SCHEMA)

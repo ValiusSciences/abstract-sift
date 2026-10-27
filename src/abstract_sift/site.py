@@ -22,6 +22,20 @@ def script_json(obj):
     )
 
 
+def patched(text, old, new):
+    # Hosted UI updates must fail here rather than publish a silently broken page.
+    if old not in text:
+        raise ValueError("Bundled UI changed; update site.py patch for: " + old[:60])
+    return text.replace(old, new)
+
+
+def substituted(pattern, replacement, text):
+    text, count = re.subn(pattern, lambda _: replacement, text, count=1)
+    if not count:
+        raise ValueError("Bundled UI changed; update site.py patch for: " + pattern)
+    return text
+
+
 def build_site(
     store,
     run_id,
@@ -36,11 +50,12 @@ def build_site(
         raise ValueError("Output must be an .html or .htm file")
     if output.exists() and not force:
         raise ValueError("Output exists; choose another path or use --force")
-    # An online SQLite backup provides a coherent snapshot even while scoring continues.
-    db = sqlite3.connect(":memory:")
+    # One WAL read transaction is a coherent snapshot even while scoring continues,
+    # without copying every corpus and run into memory.
+    db = sqlite3.connect(store.path, timeout=30)
     db.row_factory = sqlite3.Row
-    store.db.backup(db)
     try:
+        db.execute("BEGIN")
         run = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
         if run is None:
             raise ValueError("Unknown run ID")
@@ -92,32 +107,29 @@ def build_site(
         db.close()
     assets = files("abstract_sift").joinpath("web")
     template = assets.joinpath("index.html").read_text(encoding="utf-8")
-    template = re.sub(
-        r"<title>.*?</title>",
-        lambda _: "<title>" + html.escape(title) + "</title>",
-        template,
-        count=1,
+    template = substituted(
+        r"<title>.*?</title>", "<title>" + html.escape(title) + "</title>", template
     )
-    template = re.sub(
-        r"<h1>.*?</h1>",
-        lambda _: "<h1>" + html.escape(title) + "</h1>",
-        template,
-        count=1,
+    template = substituted(
+        r"<h1>.*?</h1>", "<h1>" + html.escape(title) + "</h1>", template
     )
-    template = template.replace("Valius Sciences", html.escape(brand)).replace(
+    template = patched(template, "Valius Sciences", html.escape(brand))
+    template = patched(
+        template,
         "CONFERENCE LIBRARY / ESMO 2026",
         "CONFERENCE LIBRARY / " + html.escape(corpus_label),
     )
-    template = template.replace("● Workspace access", "Local snapshot")
-    template = re.sub(
+    template = patched(template, "● Workspace access", "Local snapshot")
+    template = substituted(
         r'<p class="intro">.*?</p>',
-        lambda _: '<p class="intro">' + html.escape(description) + "</p>",
+        '<p class="intro">' + html.escape(description) + "</p>",
         template,
-        count=1,
     )
     css = assets.joinpath("style.css").read_text(encoding="utf-8")
-    template = template.replace(
-        '<link rel="stylesheet" href="style.css">', "<style>" + css + "</style>"
+    template = patched(
+        template,
+        '<link rel="stylesheet" href="style.css">',
+        "<style>" + css + "</style>",
     )
     payload = (
         '<script id="explorer-data" type="application/json">'
@@ -136,44 +148,52 @@ function loadExplorerJSON(url){
     for name in ("format.js", "scatter.js", "app.js"):
         code = assets.joinpath(name).read_text(encoding="utf-8")
         if name == "app.js":
-            code = code.replace(
+            code = patched(
+                code,
                 "fetch('data.json').then(r=>{if(!r.ok)throw Error('load');return r.json();})",
                 "loadExplorerJSON('data.json')",
             )
-            code = code.replace(
+            code = patched(
+                code,
                 "const res=await fetch(`details/${r.chunk}.json`);if(!res.ok)throw Error('load');cache.set(r.chunk,await res.json());",
                 "cache.set(r.chunk,await loadExplorerJSON(`details/${r.chunk}.json`));",
             )
-            code = code.replace(
+            code = patched(
+                code,
                 "ESMO 2026 · ${d.run} · Frozen scoring snapshot",
                 "${d.corpus} · ${d.run} · ${d.status} snapshot",
             )
-            code = code.replace(
+            code = patched(
+                code,
                 "new URL(r.link,location.origin)",
                 "(()=>{try{return new URL(r.link,location.href)}catch{return new URL('about:blank')}})()",
             )
             # file:// history replacement is not supported consistently across browsers.
-            code = code.replace("history.replaceState(null,", "safeReplaceState(null,")
+            code = patched(code, "history.replaceState(null,", "safeReplaceState(null,")
             code = (
                 "function safeReplaceState(...args){try{history.replaceState(...args);}catch{}}\n"
                 + code
             )
             # Modal race check also works where file:// history is unavailable.
-            code = code.replace(
+            code = patched(
+                code,
                 "async function openAbstract(id){",
                 "let activeAbstractId=null;\nasync function openAbstract(id){activeAbstractId=id;",
             )
-            code = code.replace(
+            code = patched(
+                code,
                 "location.hash===`#${encodeURIComponent(id)}`",
                 "activeAbstractId===id&&$('detail').open",
             )
-            code = code.replace(
+            code = patched(
+                code,
                 "$('detail').addEventListener('close',()=>safeReplaceState(null,'',location.pathname));",
                 "$('detail').addEventListener('close',()=>{activeAbstractId=null;safeReplaceState(null,'',location.pathname);});",
             )
         scripts.append(code)
-        template = template.replace(f'<script src="{name}" defer></script>', "")
-    template = template.replace(
+        template = patched(template, f'<script src="{name}" defer></script>', "")
+    template = patched(
+        template,
         "</body>",
         payload + "<script>" + bootstrap + "\n".join(scripts) + "</script></body>",
     )

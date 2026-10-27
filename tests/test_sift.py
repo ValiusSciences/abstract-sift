@@ -2,6 +2,7 @@ import asyncio
 import csv
 import io
 import json
+import math
 import os
 from pathlib import Path
 import tempfile
@@ -95,7 +96,39 @@ class CoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             core.parse_answers(p, obj, names)
 
+    def test_answer_contract_rejections(self):
+        p, j = core.PROVIDERS["openai"], core.PROVIDERS["jev"]
+        _, names = core.payload(p, "q", [item("a")])
+        for provider, response in [
+            (p, dict(answers=[])),
+            (j, dict(model=j.model, answers={"q_9": {}})),
+            (j, dict(model=j.model, answers=[])),
+        ]:
+            with self.assertRaises(ValueError):
+                core.parse_answers(provider, response, names)
+        twice = dict(name="q_0", type="predicate", probability=0.5)
+        rs = core.parse_answers(p, dict(model=p.model, answers=[twice, twice]), names)
+        self.assertEqual(rs[0]["error"], "missing_or_duplicate_answer")
+        wrong = {"q_0": dict(type="predicate", noul=0.5)}
+        rs = core.parse_answers(j, dict(model=j.model, answers=wrong), names)
+        self.assertEqual(rs[0]["error"], "invalid_answer_type")
+
+    def test_label_boundaries_are_inclusive(self):
+        self.assertEqual(core.label(0.7), "relevant")
+        self.assertEqual(core.label(0.3), "not_relevant")
+        self.assertEqual(core.label(0.5), "review")
+        self.assertEqual(core.label(0.5, 0.2, 0.5), "relevant")
+
+    def test_spearman_uses_average_ranks_for_ties(self):
+        self.assertEqual(ranks([3, 1, 2]), [3, 1, 2])
+        self.assertEqual(ranks([1, 2, 2, 3]), [1, 2.5, 2.5, 4])
+        # Hand-calculated Pearson correlation of [1,2.5,2.5,4] and [1,3,2,4].
+        rho = correlation(ranks([1, 2, 2, 3]), ranks([1, 3, 2, 4]))
+        self.assertAlmostEqual(rho, math.sqrt(0.9))
+        self.assertIsNone(correlation([1], [1]))
+
     def test_cost_precision_and_unknown_usage(self):
+        self.assertEqual(core.money("0.25"), 250_000_000)
         self.assertEqual(core.money(".0000001"), 100)
         self.assertEqual(core.dollars(14200), "0.000014200")
         self.assertEqual(
@@ -113,7 +146,12 @@ class CoreTests(unittest.TestCase):
                 },
             )
         )
-        for val in ("nan", "Infinity", "0", "-1"):
+        for details in ("wrong", {"cache_write_tokens": 5}):
+            usage = {"input_tokens": 100, "input_tokens_details": details}
+            self.assertIsNone(
+                core.usage_cost(core.PROVIDERS["openai"], {"usage": usage})
+            )
+        for val in ("nan", "Infinity", "0", "-1", "abc"):
             with self.assertRaises(ValueError):
                 core.money(val)
 
@@ -130,6 +168,22 @@ class CoreTests(unittest.TestCase):
             self.assertEqual(os.environ["OPENAI_API_KEY"], "existing")
             self.assertEqual(os.environ["JEV_API_KEY"], "$(touch nope)")
             self.assertNotIn("UNRELATED", os.environ)
+
+    def test_env_export_prefix_quotes_and_comments(self):
+        with (
+            tempfile.TemporaryDirectory() as d,
+            patch.dict(os.environ, {}, clear=True),
+        ):
+            p = Path(d) / ".env"
+            p.write_text(
+                "# comment\n\nexport OPENAI_API_KEY='single'\n"
+                "TYPESAFE_API_KEY = plain\nJEV_API_KEY\n"
+            )
+            load_env(p)
+            load_env(Path(d) / "absent.env")
+            self.assertEqual(os.environ["OPENAI_API_KEY"], "single")
+            self.assertEqual(os.environ["TYPESAFE_API_KEY"], "plain")
+            self.assertNotIn("JEV_API_KEY", os.environ)
 
 
 class IntegrationTests(unittest.TestCase):
@@ -276,6 +330,73 @@ class IntegrationTests(unittest.TestCase):
         r = report(self.store, run)
         self.assertIsNone(r["kappa"])
         self.assertIsNone(r["spearman"])
+
+    def test_kappa_and_agreement_match_hand_calculation(self):
+        cells = [(0.9, 0.9)] * 20 + [(0.9, 0.1)] * 5 + [(0.1, 0.9)] * 10
+        cells += [(0.1, 0.1)] * 15
+        run = self.run_case([item(f"{i:02d}") for i in range(len(cells))])
+        with self.store.db:
+            for i, pair in enumerate(cells):
+                for p, v in zip(("openai", "jev"), pair):
+                    self.store.db.execute(
+                        "UPDATE results SET status='ok',probability=?,model=? WHERE run=? AND id=? AND provider=?",
+                        (v, core.PROVIDERS[p].model, run, f"{i:02d}", p),
+                    )
+        r = report(self.store, run)
+        # po = 35/50; pe = (25*30 + 25*20)/50^2 = 0.5; kappa = (0.7-0.5)/0.5.
+        self.assertAlmostEqual(r["binary_agreement"], 0.7)
+        self.assertAlmostEqual(r["kappa"], 0.4)
+        self.assertAlmostEqual(r["positive_agreement"], 40 / 55)
+        self.assertAlmostEqual(r["negative_agreement"], 30 / 45)
+        self.assertEqual(r["three_way_matrix"]["relevant"]["not_relevant"], 5)
+        self.assertEqual(
+            r["top_k"]["20"], dict(k=20, overlap=1, jaccard=1, tie_break="abstract_id")
+        )
+        with self.store.db:
+            self.store.db.execute(
+                "UPDATE results SET model='another-build' WHERE run=? AND id='00' AND provider='jev'",
+                (run,),
+            )
+        with self.assertRaises(ValueError):
+            report(self.store, run)
+        with self.assertRaises(ValueError):
+            report(self.store, self.run_case(providers=["openai"]))
+
+    def test_csv_import_and_record_validation(self):
+        p = Path(self.tmp.name) / "corpus.csv"
+        p.write_text(
+            "﻿id,title,authors,full_text,link,extra\n"
+            'x1,Title,Author,"Text, with comma",https://example.org,ignored\n',
+            encoding="utf-8",
+        )
+        self.assertEqual(self.store.read_corpus(p, "csv")["records"], 1)
+        self.assertEqual(
+            self.store.corpus("csv"),
+            [
+                dict(
+                    id="x1",
+                    title="Title",
+                    authors="Author",
+                    full_text="Text, with comma",
+                    link="https://example.org",
+                )
+            ],
+        )
+        bad = Path(self.tmp.name) / "bad.jsonl"
+        for record in (
+            json.dumps(dict(id="a", title="t")),
+            json.dumps(dict(item(), authors=["not", "a", "string"])),
+            json.dumps(dict(item(), id=" ")),
+            json.dumps(dict(item(), full_text="x" * 2_000_001)),
+            "",
+        ):
+            bad.write_text(record + "\n")
+            with self.assertRaises(ValueError):
+                self.store.read_corpus(bad, "bad")
+        with self.assertRaises(ValueError):
+            self.store.corpus("bad")
+        with self.assertRaises(ValueError):
+            self.store.run("run_missing")
 
     def test_cancellation_records_unknown_and_resumes(self):
         run = self.run_case(providers=["openai"], concurrency=1)

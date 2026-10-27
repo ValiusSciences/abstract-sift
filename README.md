@@ -34,8 +34,6 @@ uv run abstract-sift score --corpus demo --query-file examples/interest.txt --pr
 
 Store `OPENAI_API_KEY` and `TYPESAFE_API_KEY` (or `JEV_API_KEY`) in `.env` here or in your environment. Existing environment values take precedence. The application reads literal values without executing shell expressions. Keys are never saved in the run database or reports. Do not commit `.env`. Scoring sends the research interest, abstract IDs, titles, and full texts to each selected provider.
 
-On macOS, double-click **Run Demo.command** to install dependencies and score the two fictional abstracts with both providers, using a $0.05 dispatch budget. It reads your existing `.env`. It does not start the conference corpus.
-
 ## ESMO 2026 example
 
 The [versioned corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v1) provides **4,418 abstracts, including 4,284 with full text**, as a 6.13 MiB gzip-compressed JSONL download. It includes provenance, checksums and our actual [research-interest criteria](examples/esmo2026-interest.txt): clinical ADC, CAR-T, bispecific and T-cell engager results in solid cancers with explicit biomarkers.

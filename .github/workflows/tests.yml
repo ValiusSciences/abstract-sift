@@ -1,15 +1,41 @@
 name: Tests
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly re-audit so newly published advisories surface without a push.
+    - cron: '17 6 * * 1'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  checks:
+    name: Lint, repository hygiene and dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run black --check src tests scripts
+      - run: uv run ruff check src tests scripts
+      - run: uv run python scripts/check_repo.py
+      - name: Audit locked dependencies for known vulnerabilities
+        run: |
+          uv export --frozen --all-groups --no-emit-project --format requirements-txt -o "$RUNNER_TEMP/requirements.txt"
+          uvx pip-audit@2.10.0 --strict --disable-pip --require-hashes -r "$RUNNER_TEMP/requirements.txt"
   tests:
+    if: github.event_name != 'schedule'
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python: ['3.11', '3.13', '3.14']
+        python: ['3.11', '3.12', '3.13', '3.14']
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,9 +46,11 @@ jobs:
           node-version: '22'
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked
-      - run: uv run black --check src tests scripts
-      - run: uv run coverage run --branch --source=abstract_sift -m unittest discover -s tests -v
-      - run: uv run coverage report --fail-under=85
+      - name: Unit tests with warnings as errors
+        env:
+          PYTHONWARNINGS: error
+        run: uv run coverage run --branch --source=abstract_sift -m unittest discover -s tests -v
+      - run: uv run coverage report --fail-under=95
       - run: uv run python scripts/check_release.py
       - run: uv build
       - run: uv run python scripts/check_artifacts.py

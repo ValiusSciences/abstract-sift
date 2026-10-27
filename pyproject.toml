@@ -24,4 +24,10 @@ abstract_sift = ["web/*.html", "web/*.css", "web/*.js"]
 dev = [
     "black>=26.10.1",
     "coverage>=7.17.0",
+    "ruff>=0.17.3",
 ]
+
+[tool.ruff.lint]
+# Correctness checks only; Black owns formatting.
+select = ["F", "E9", "B"]
+ignore = ["B905"]

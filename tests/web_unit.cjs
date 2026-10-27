@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const {splitAbstract,bodyHTML,percent}=require('../src/abstract_sift/web/format.js');
+const {group,svg}=require('../src/abstract_sift/web/scatter.js');
+assert.equal(percent(0),'0%');assert.equal(percent(1),'100%');assert.equal(percent(.865),'86.5%');assert.equal(percent(null),'—');
+const row={id:'a',title:'Synthetic title',authors:'A. One; B. Two'};
+const text='a\nSynthetic title\n\nA. One; B. Two\n\n¹ Example University\n\nBackground\n\nSafe <script>data</script>\n\nMethods\n\nMore evidence';
+const parsed=splitAbstract(text,row);assert.equal(parsed.affiliations,'¹ Example University');assert(parsed.body.startsWith('Background'));assert(!parsed.body.includes('B. Two'));
+assert(bodyHTML(parsed.body).includes('<strong class="sectionheading">Methods</strong>'));assert(bodyHTML(parsed.body).includes('&lt;script&gt;'));assert(!bodyHTML('The Results were promising').includes('<strong'));
+assert.equal(splitAbstract('Unstructured narrative',row).body,'Unstructured narrative');
+const g=group([{id:'a',title:'A',openai:0,jev:0},{id:'b',title:'B',openai:0,jev:0},{id:'c',title:'<script>',openai:1,jev:1},{id:'d',openai:null,jev:1}]);
+assert.equal(g.length,2);assert.equal(g[0].rows.length,2);const markup=svg(g);assert(markup.includes('cx="70" cy="445"'));assert(markup.includes('cx="750" cy="25"'));assert(!markup.includes('<script>'));assert(markup.includes('role="button"'));
+console.log('PASS: bundled web formatters and scatter grouping with synthetic fixtures.');

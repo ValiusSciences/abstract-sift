@@ -1,0 +1,34 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ['3.11', '3.13', '3.14']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run black --check src tests scripts
+      - run: uv run coverage run --branch --source=abstract_sift -m unittest discover -s tests -v
+      - run: uv run coverage report --fail-under=85
+      - run: uv run python scripts/check_release.py
+      - run: uv build
+      - run: uv run python scripts/check_artifacts.py
+      - name: Verify installed wheel outside source checkout
+        shell: bash
+        run: |
+          uv venv /tmp/abstract-sift-wheel-env
+          uv pip install --python /tmp/abstract-sift-wheel-env/bin/python dist/*.whl
+          /tmp/abstract-sift-wheel-env/bin/python scripts/check_release.py

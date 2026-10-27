@@ -1,0 +1,7 @@
+Find new human clinical data on ADCs (antibody-drug conjugates), CAR-T therapies, bispecific antibodies, or T-cell engagers in solid cancers, with clear biomarkers.
+
+Include original patient results from any clinical phase or clinical cohort, including combinations, early-phase studies, and negative findings. New efficacy, safety, durability, resistance, or clinical biomarker findings qualify. Mixed populations must report identifiable solid-tumor results for a requested modality.
+
+Require an explicitly named patient/tumor biomarker linked to selection, characterization, stratification, or outcomes, such as antigen expression, amplification, or a genomic alteration. Target antigens qualify if their presence/expression is used or reported in patients; a drug target/name alone is insufficient. Predictive validation is not required.
+
+Exclude hematologic-only disease, preclinical-only studies, reviews, trials in progress without patient results, unrelated modalities, and studies lacking explicit biomarker evidence. Use only abstract evidence; do not infer missing details. Preserve uncertainty when a required criterion is unclear.

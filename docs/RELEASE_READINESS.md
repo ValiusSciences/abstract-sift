@@ -1,6 +1,6 @@
 # Release readiness
 
-Local audit completed 2026-10-26. Status: ready for beta use; choose a license before public open-source release.
+Local audit completed 2026-10-26. Status: ready for beta use; software licensed under MIT.
 
 ## Verified locally
 
@@ -22,6 +22,6 @@ Concurrent requests wait for in-flight budget reservations to reconcile before r
 
 GitHub Actions is configured for macOS/Linux with Python 3.11, 3.13 and 3.14, including formatting, coverage, offline workflow, archive inspection and installed-wheel checks. This matrix has not yet run on GitHub.
 
-Select a code license before publication. Real-browser visual/accessibility validation and clinical relevance validation remain separate from these automated checks. Live provider behavior was mocked during this audit; no paid scoring calls were made and no existing scoring runs were modified.
+The software is licensed under MIT; third-party abstracts retain their original rights. Real-browser visual/accessibility validation and clinical relevance validation remain separate from these automated checks. Live provider behavior was mocked during this audit; no paid scoring calls were made and no existing scoring runs were modified.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for reproducible check commands.

@@ -160,7 +160,7 @@ Before scoring, show the corpus size, evidence source, estimated request/token c
 
 Log operational counters, timings, request IDs and error classes, not keys or research text. Telemetry is off by default. Abstract content never invokes tools, follows URLs, or changes application instructions. Authentication/quota failures pause the queue and preserve progress.
 
-Publish code and synthetic fixtures separately from the conference corpus. Proposed code license: Apache-2.0, to be confirmed before publication. Do not redistribute the ESMO archive, derived restricted datasets or asset tokens as part of the repository; provide configurable import instructions.
+Publish code and synthetic fixtures separately from the conference corpus. Selected code license: MIT (confirmed 2026-10-27; supersedes the original Apache-2.0 proposal). Do not redistribute the ESMO archive, derived restricted datasets or asset tokens as part of the repository; provide configurable import instructions.
 
 CI covers formatting/types, unit/integration tests with mocked API responses, dependency checks and secret scanning. A clean clone runs tests without private data or API credentials. Live benchmarks are opt-in and cost-bounded; untrusted pull requests receive no API secrets.
 
@@ -196,4 +196,4 @@ Use human labels to measure each model’s precision/recall/calibration and test
 
 Agreed: console-first, API-key-based decision-model screening with explicit OpenAI-only, JEV-only, and both modes. Every eligible abstract is assessed by each selected provider. Both mode supports agreement/discordance analysis from the first release. Keep the engine extensible without adding unrequested providers now.
 
-No ChatGPT sign-in, Responses generation, or browser interface is in the current scope. The clean repository remains separate from private downloads. Next is the dual-provider capability and throughput spike, followed by the CLI and comparison engine. Confirm provisional name/license before publication; validate speed and usefulness before making claims.
+No ChatGPT sign-in, Responses generation, or browser interface is in the current scope. The clean repository remains separate from private downloads. Next is the dual-provider capability and throughput spike, followed by the CLI and comparison engine. License confirmed as MIT; validate speed and usefulness before making claims.

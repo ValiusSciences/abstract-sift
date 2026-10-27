@@ -20,4 +20,4 @@ HTML templates live in `src/abstract_sift/web/`. The standalone smoke check uses
 
 Use `docs/CLI.md` for implemented commands; `docs/PLAN.md` is historical design intent, not a claim that every feature is shipped. Update documentation when CLI behavior or output changes. Site publication is separate from releasing this CLI.
 
-Before a public release, confirm the selected code license, inspect both wheel and source archives, and run the installed-wheel smoke check documented in CI. Do not publish release artifacts until these checks pass.
+Before a public release, retain the MIT license notice, inspect both wheel and source archives, and run the installed-wheel smoke check documented in CI. Do not publish release artifacts until these checks pass.

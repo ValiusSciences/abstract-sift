@@ -156,7 +156,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete test, coverage, offline 
 
 Tests use fictional abstracts and mock transports; no keys or paid calls are required. The earlier [plan](docs/PLAN.md), [comparison specification](docs/COMPARISON.md), and [cost design](docs/COST_TRACKING.md) include future work beyond this release. No OAuth, settled-invoice reconciliation, or automatic threshold calibration is included. The offline HTML explorer and measured benchmark are described below.
 
-This folder is portable and independent of conference downloader scripts. Conference content and credentials are excluded from version control. A code license has not yet been selected; select one before publishing as open source. A code license does not grant redistribution rights to imported abstracts.
+This folder is portable and independent of conference downloader scripts. Conference content and credentials are excluded from version control. The software is licensed under the [MIT License](LICENSE), copyright 2026 Valius Sciences. Third-party conference abstracts retain their original rights and are not covered by the software license.
 
 ## Generate the explorer as a local HTML file
 

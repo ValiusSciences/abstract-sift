@@ -23,7 +23,16 @@ For `export`, `--format csv|tsv|jsonl` still selects the **file format**. Use `-
 
 ## Quick start
 
-From this directory, with [uv](https://docs.astral.sh/uv/) installed:
+From this directory, with [uv](https://docs.astral.sh/uv/) installed, **set your API keys before scoring**. Create or edit `.env` in the repository root:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
+JEV_API_KEY=your_jev_api_key
+```
+
+Replace the placeholders with your actual keys. **Both keys are required for `--provider both`**, as used below. For `--provider openai` or `--provider jev`, only that provider's key is needed. `TYPESAFE_API_KEY` is also accepted for JEV.
+
+Then run:
 
 ```bash
 uv sync
@@ -32,7 +41,7 @@ uv run abstract-sift estimate --corpus demo --query-file examples/interest.txt -
 uv run abstract-sift score --corpus demo --query-file examples/interest.txt --provider both --max-cost-usd 0.05
 ```
 
-Store `OPENAI_API_KEY` and `TYPESAFE_API_KEY` (or `JEV_API_KEY`) in `.env` here or in your environment. Existing environment values take precedence. The application reads literal values without executing shell expressions. Keys are never saved in the run database or reports. Do not commit `.env`. Scoring sends the research interest, abstract IDs, titles, and full texts to each selected provider.
+You can also set the keys as environment variables; existing environment values take precedence over `.env`. The application reads literal values without executing shell expressions. Keys are never saved in the run database or reports. Do not commit `.env`. Scoring sends the research interest, abstract IDs, titles, and full texts to each selected provider.
 
 ## ESMO 2026 example
 

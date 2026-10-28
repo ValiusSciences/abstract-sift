@@ -106,22 +106,6 @@ uv run abstract-sift export RUN_ID --format jsonl --view retained --output expor
 
 Exports accept the same `--view`, `--contains`, `--status`, `--sort`, `--ascending`, `--low`, and `--high` settings as results. They contain **all matching rows**, irrespective of terminal pagination. `--include-text` includes the complete abstract text. Empty selections produce a table with headers. CSV/TSV text that could execute as a spreadsheet formula is escaped; JSONL preserves original text. Terminal scores are rounded to three decimals; exports retain full numeric precision.
 
-## Repeat a live speed test
-
-A completed run does no work on resume, and an identical new run normally reuses cached scores. Add `score --no-cache` to force new API evaluations and measure live throughput. It creates a new run and incurs new costs; the old run remains available. Resuming that new run still skips its own completed results.
-
-The first full ESMO run took 47 minutes 27.5 seconds, with approximately 6.3 million reported input tokens per provider. At 600,000 tokens/minute, even accurate accounting implies roughly ten minutes of token throughput. Under a minute requires substantially higher provider quotas and low enough request latency; it is not guaranteed by the concurrency setting.
-
-For an account whose quotas allow the following ceilings, a fresh benchmark command is:
-
-```bash
-time uv run abstract-sift score --corpus esmo2026 --query-file examples/esmo2026-interest.txt \
-  --provider both --no-cache --concurrency 16 --batch-size 32 \
-  --rpm 600 --tpm 10000000 --max-cost-usd 5
-```
-
-These are application ceilings per provider, not evidence of available account quotas. Match them to your accounts' limits, including per-second limits where applicable. Watch for `http_429` responses; retries can dominate elapsed time when the service throttles requests. A rolling per-minute limiter can burst and does not enforce a provider's separate per-second quota. Record the new run ID and inspect `status`, `cost`, and coverage after completion. `--no-cache` bypasses this application's saved scores, not any provider-side caching. This benchmark's higher limits do not change the dollar allowance or scoring criteria.
-
 ## Compare screening stability across runs
 
 ```bash

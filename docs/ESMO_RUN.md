@@ -2,7 +2,7 @@
 
 Run these commands from the repository directory after `uv sync`. Put your `OPENAI_API_KEY` and `TYPESAFE_API_KEY` (or `JEV_API_KEY`) in `.env`.
 
-The shared [research criteria](../examples/esmo2026-interest.txt) look for new clinical data on ADCs, CAR-Ts, bispecifics and T-cell engagers in solid cancers with explicit biomarkers.
+The shared [research criteria](../examples/esmo2026-interest.txt) look for new clinical data on ADCs, adoptive cell therapies (including CAR-T, TCR-T, NK, gamma-delta T cells and TILs), bispecifics and T-cell engagers in solid cancers with explicit biomarkers. Use the current criteria file from the repository; the release's bundled interest file records the criteria at release time.
 
 ## 1. Import the corpus
 

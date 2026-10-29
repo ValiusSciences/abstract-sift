@@ -1,4 +1,6 @@
-Find new human clinical data on ADCs (antibody-drug conjugates), CAR-T therapies, bispecific antibodies, or T-cell engagers in solid cancers, with clear biomarkers.
+Find new human clinical data on ADCs (antibody-drug conjugates), adoptive cell therapies, bispecific antibodies, or T-cell engagers in solid cancers, with clear biomarkers.
+
+Eligible adoptive cell therapies include CAR-T cells; T-cell receptor-engineered T cells (TCR-T, T-TCR, or TCR T-cell therapy); natural killer (NK) cells, including CAR-NK; gamma-delta (γδ) T cells; tumor-infiltrating lymphocytes (TILs); and other adoptively transferred immune-cell therapies. Include both engineered and unmodified cell products, and both autologous and allogeneic approaches.
 
 Include original patient results from any clinical phase or clinical cohort, including combinations, early-phase studies, and negative findings. New efficacy, safety, durability, resistance, or clinical biomarker findings qualify. Mixed populations must report identifiable solid-tumor results for a requested modality.
 

@@ -45,7 +45,7 @@ You can also set the keys as environment variables; existing environment values 
 
 ## ESMO 2026 example
 
-The [versioned corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v1) provides **4,418 abstracts, including 4,284 with full text**, as a 6.13 MiB gzip-compressed JSONL download. It includes provenance, checksums and our actual [research-interest criteria](examples/esmo2026-interest.txt): clinical ADC, CAR-T, bispecific and T-cell engager results in solid cancers with explicit biomarkers.
+The [versioned corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2) provides **4,418 abstracts, including 4,375 with full text**, as a 6.34 MiB gzip-compressed JSONL download. It includes provenance, checksums and our actual [research-interest criteria](examples/esmo2026-interest.txt): clinical ADC, CAR-T, bispecific and T-cell engager results in solid cancers with explicit biomarkers.
 
 Follow the [ESMO walkthrough](docs/ESMO_RUN.md) to download and verify the corpus, import it, estimate cost, score with either or both providers, inspect disagreements, and generate an offline HTML explorer. Downloads require repository access while this repository is private. The corpus is distributed separately from source code and Python packages; original abstract rights remain with their respective holders.
 

@@ -6,17 +6,17 @@ The shared [research criteria](../examples/esmo2026-interest.txt) look for new c
 
 ## 1. Import the corpus
 
-Download the [corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v1), verify it, and import it. While the repository is private, `gh auth login` and repository access are required.
+Download the [corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2), verify it, and import it. While the repository is private, `gh auth login` and repository access are required.
 
 ```bash
 mkdir -p data/esmo2026
-gh release download esmo2026-corpus-v1 --repo ValiusSciences/abstract-sift --dir data/esmo2026
+gh release download esmo2026-corpus-v2 --repo ValiusSciences/abstract-sift --dir data/esmo2026
 (cd data/esmo2026 && shasum -a 256 -c SHA256SUMS)
 gzip -dk data/esmo2026/esmo2026-abstracts.jsonl.gz
 uv run abstract-sift import data/esmo2026/esmo2026-abstracts.jsonl --corpus esmo2026
 ```
 
-Expected: **4,418 records**, with **4,284 full texts** and **134 missing texts**. Download and import make no model API calls.
+Expected: **4,418 records**, with **4,375 full texts** and **43 missing texts**. Download and import make no model API calls.
 
 ## 2. Small real-data check
 
@@ -42,7 +42,7 @@ uv run abstract-sift score --corpus esmo2026 \
 
 These speed settings require matching provider quotas; lower them if needed. One full run took **13.31 seconds** and cost approximately **$0.87** in reported usage. Speed and cost vary. The $5 dispatch allowance is an application estimate, not a provider billing cap. Matching successful pilot scores can be reused automatically.
 
-Use the **full run's printed ID** as `RUN_ID` below. With no scoring failures, expect 4,284 successful scores and 134 missing-text records per provider.
+Use the **full run's printed ID** as `RUN_ID` below. With no scoring failures, expect 4,375 successful scores and 43 missing-text records per provider.
 
 ## 4. List the top 25 by OpenAI score
 

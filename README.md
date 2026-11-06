@@ -4,7 +4,7 @@ A local CLI for screening research abstracts against a research-interest text wi
 
 Version 0.1 implements concurrent, resumable scoring, per-request cost accounting, CSV/JSONL exports, and comparison metrics. Both live API integrations passed a two-abstract smoke test; a full ESMO run subsequently completed in 13.31 seconds of scoring time (15.27 seconds wall time) on the user’s account. Treat this as an initial beta, not a guarantee of throughput or screening accuracy. Python 3.11–3.14 on macOS/Linux is the test target; use WSL on Windows.
 
-For detailed usage, see the [CLI reference](docs/CLI.md) and [ESMO full-corpus run guide](docs/ESMO_RUN.md), including coverage checks, budget examples, monitoring, and recovery.
+For detailed usage, see the [CLI reference](docs/CLI.md), [ESMO full-corpus run guide](docs/ESMO_RUN.md), and [SITC scoring and bundle guide](docs/SITC_RUN.md), including coverage checks, budget examples, monitoring, and recovery.
 
 ## Terminal output and progress
 
@@ -48,6 +48,12 @@ You can also set the keys as environment variables; existing environment values 
 The [versioned corpus release](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2) provides **4,418 abstracts, including 4,375 with full text**, as a 6.34 MiB gzip-compressed JSONL download. It includes provenance, checksums and a snapshot of the research-interest criteria at release time. The current [research-interest criteria](examples/esmo2026-interest.txt) cover clinical ADC, adoptive cell therapy (CAR-T, TCR-T, NK, gamma-delta T cells and TILs), bispecific and T-cell engager results in solid cancers with explicit biomarkers.
 
 Follow the [ESMO walkthrough](docs/ESMO_RUN.md) to download and verify the corpus, import it, estimate cost, score with either or both providers, inspect disagreements, and generate an offline HTML explorer. Downloads require repository access while this repository is private. The corpus is distributed separately from source code and Python packages; original abstract rights remain with their respective holders.
+
+## SITC 2026 example
+
+The [SITC 2026 bundle](https://github.com/ValiusSciences/abstract-sift/releases/tag/sitc2026-corpus-v1) provides **1,127 listing records, including 1,126 full texts and 19 late-breaking abstracts**. The one withdrawn entry remains visible with missing text. It includes the complete metadata compilation, import-ready corpus, criteria snapshot, separate OpenAI and JEV scores, an offline explorer, provenance and checksums.
+
+Follow the [SITC scoring guide](docs/SITC_RUN.md) to download and verify the bundle, inspect the saved results without API calls, or reproduce the two-provider workflow. The release uses the same research criteria, relevance rubric and 0.3/0.7 thresholds as the current ESMO workflow. Its pilot and full run cost about **$0.20 combined** in usage-derived estimates; future costs and scores may differ.
 
 ## Your corpus
 

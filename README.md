@@ -6,6 +6,21 @@ Version 0.1 implements concurrent, resumable scoring, per-request cost accountin
 
 For detailed usage, see the [CLI reference](docs/CLI.md), [ESMO full-corpus run guide](docs/ESMO_RUN.md), and [SITC scoring and bundle guide](docs/SITC_RUN.md), including coverage checks, budget examples, monitoring, and recovery.
 
+For maintainers preparing the next conference, start with the [conference workflow playbook](docs/CONFERENCE_WORKFLOW.md): collection, release bundles, scoring documentation, TRACE annotations, and authenticated Sites with persistent scientist voting. Tagging and voting currently run in the conference Site projects; they are not CLI features.
+
+## Conference coverage and bundles
+
+Versioned bundles are separate from the software package. Counts refer to the published snapshots; source abstracts retain their original rights.
+
+| Conference | Records / full texts | Processing status | Coverage notes | Bundle | Guide |
+| --- | --- | --- | --- | --- | --- |
+| ESMO 2026 | 4,418 / 4,375 | Scored; published bundle contains corpus and criteria | Includes late-breaking abstracts; 43 missing texts | [v2](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2) | [ESMO](docs/ESMO_RUN.md) |
+| SITC 2026 | 1,127 / 1,126 | Corpus, two-provider scores and offline explorer | Includes 19 late-breaking abstracts; one withdrawn entry | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/sitc2026-corpus-v1) | [SITC](docs/SITC_RUN.md) |
+| ASH 2026 | 6,376 / 6,376 | Corpus, two-provider scores and offline explorer; unchanged solid-tumor criteria | Includes six plenary abstracts. **Late-breaking abstracts are not included yet** (scheduled December 7, 2026). | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/ash2026-corpus-v1) | [ASH](docs/ASH_RUN.md) |
+| ACR Convergence 2026 | 2,995 / 2,988 | **Unscored** corpus and metadata; no oncology criteria applied | Includes 22 late-breaking and 17 patient-perspective abstracts; seven withdrawn entries | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/acr2026-corpus-v1) | [ACR](docs/ACR_RUN.md) |
+
+Each release includes provenance and checksums. ACR requires a new rheumatology-specific research question before scoring. Private TRACE annotations and scientist votes are not included in these release bundles.
+
 ## Terminal output and progress
 
 Commands default to readable tables. Add `--format json` (or `--json`) to retain the complete machine-readable schema. `--output-format table|json` is also available on every command. `show` includes readable full text after its score table.
@@ -54,6 +69,12 @@ Follow the [ESMO walkthrough](docs/ESMO_RUN.md) to download and verify the corpu
 The [SITC 2026 bundle](https://github.com/ValiusSciences/abstract-sift/releases/tag/sitc2026-corpus-v1) provides **1,127 listing records, including 1,126 full texts and 19 late-breaking abstracts**. The one withdrawn entry remains visible with missing text. It includes the complete metadata compilation, import-ready corpus, criteria snapshot, separate OpenAI and JEV scores, an offline explorer, provenance and checksums.
 
 Follow the [SITC scoring guide](docs/SITC_RUN.md) to download and verify the bundle, inspect the saved results without API calls, or reproduce the two-provider workflow. The release uses the same research criteria, relevance rubric and 0.3/0.7 thresholds as the current ESMO workflow. Its pilot and full run cost about **$0.20 combined** in usage-derived estimates; future costs and scores may differ.
+
+## ASH 2026 example
+
+The [ASH 2026 bundle](https://github.com/ValiusSciences/abstract-sift/releases/tag/ash2026-corpus-v1) contains **6,376 numbered abstracts, all with full text**, including six plenary abstracts. Both providers scored every record using the **unchanged solid-tumor criteria**, explicitly selected for this conference. Late-breaking abstracts scheduled for December 7 are not yet included.
+
+See the [ASH bundle and scoring guide](docs/ASH_RUN.md) for provenance, local bundle verification, exact criteria, reproduction commands and interpretation. TRACE annotations and scientist voting are separate hosted review features.
 
 ## Your corpus
 
@@ -165,7 +186,7 @@ The generator takes a coherent snapshot of the selected run, includes every reco
 
 A local file does **not** inherit ChatGPT workspace authentication. The access badge says “Local snapshot”; anyone given the file can read the embedded abstracts. Only this run's content is embedded—no credentials, request logs, or unrelated runs. The ESMO snapshot is approximately 23 MB.
 
-UI assets are packaged under `src/abstract_sift/web/`, based on hosted Site source commit `2af81de753a9fccbe7dfd97abdd584086a85513b`. The local generator adapts data loading and local-file history handling without changing scoring. It does not require the original Sites project folder or publishing credentials. After intentional hosted UI changes, copy the five UI assets (index.html, style.css, app.js, format.js, scatter.js) into that directory and rerun the standalone checks before releasing.
+UI assets are packaged under `src/abstract_sift/web/`, based on hosted Site source commit `2af81de753a9fccbe7dfd97abdd584086a85513b`. The local generator adapts data loading and local-file history handling without changing scoring. It does not require the original Sites project folder or publishing credentials. When porting hosted UI changes, adapt the five UI assets (index.html, style.css, app.js, format.js, scatter.js) deliberately and rerun the standalone checks before releasing. Hosted TRACE enrichment and voting are separate features: do not copy voting API calls or authenticated dependencies into the network-free offline exporter. See the [conference workflow](docs/CONFERENCE_WORKFLOW.md).
 
 ```bash
 node tests/check_site.cjs exports/explorer.html

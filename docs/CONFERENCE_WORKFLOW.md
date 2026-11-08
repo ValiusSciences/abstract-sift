@@ -37,6 +37,7 @@ Suggested release assets, using a conference-specific prefix:
 | Asset | Contents |
 | --- | --- |
 | `<conference>-abstracts.jsonl.gz` | Five-field import corpus |
+| `<conference>-abstracts.tsv` and `.tsv.gz` | Same five fields, without scores; UTF-8, quoted multiline fields, IDs preserved as strings |
 | `<conference>-compilation.csv.gz` | Rich metadata, full text and source provenance |
 | `<conference>-interest.txt` | Exact scoring criteria, immutable within this release |
 | `<conference>-scores.csv.gz` and `.jsonl.gz` | Separate scores/statuses/models, evidence hashes and text |
@@ -45,6 +46,8 @@ Suggested release assets, using a conference-specific prefix:
 | `manifest.json` | Version, source URLs/dates/hashes, counts, transformations, exceptions, rights and artifact hashes |
 | `SHA256SUMS` | Checksums for finalized published files; do not self-hash this file |
 | `SCORING_GUIDE.md` | Conference-specific download, verification, scoring and recovery instructions |
+
+For a lossless TSV addition to an existing release, preserve the existing corpus/manifests and add a `TSV_GUIDE.md` and `TSV_SHA256SUMS` covering the new files. Validate TSV-to-JSONL round-trip equality for every field; physical line counts are not record counts when abstracts contain newlines.
 
 Use a new release version when evidence or scores change. Record both uncompressed corpus integrity and compressed release-file integrity. Finalize documents and assets before checksums; validate them by downloading the published release when publishing is in scope. Source abstract rights remain with their holders; the software license does not license the corpus.
 

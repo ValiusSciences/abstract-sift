@@ -12,14 +12,14 @@ For maintainers preparing the next conference, start with the [conference workfl
 
 Versioned bundles are separate from the software package. Counts refer to the published snapshots; source abstracts retain their original rights.
 
-| Conference | Records / full texts | Processing status | Coverage notes | Bundle | Guide |
-| --- | --- | --- | --- | --- | --- |
-| ESMO 2026 | 4,418 / 4,375 | Scored; published bundle contains corpus and criteria | Includes late-breaking abstracts; 43 missing texts | [v2](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2) | [ESMO](docs/ESMO_RUN.md) |
-| SITC 2026 | 1,127 / 1,126 | Corpus, two-provider scores and offline explorer | Includes 19 late-breaking abstracts; one withdrawn entry | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/sitc2026-corpus-v1) | [SITC](docs/SITC_RUN.md) |
-| ASH 2026 | 6,376 / 6,376 | Corpus, two-provider scores and offline explorer; unchanged solid-tumor criteria | Includes six plenary abstracts. **Late-breaking abstracts are not included yet** (scheduled December 7, 2026). | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/ash2026-corpus-v1) | [ASH](docs/ASH_RUN.md) |
-| ACR Convergence 2026 | 2,995 / 2,988 | **Unscored** corpus and metadata; no oncology criteria applied | Includes 22 late-breaking and 17 patient-perspective abstracts; seven withdrawn entries | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/acr2026-corpus-v1) | [ACR](docs/ACR_RUN.md) |
+| Conference | Records / full texts | Processing status | Coverage notes | Bundle | Unscored TSV | Guide |
+| --- | --- | --- | --- | --- | --- | --- |
+| ESMO 2026 | 4,418 / 4,375 | Scored; published bundle contains corpus and criteria | Includes late-breaking abstracts; 43 missing texts | [v2](https://github.com/ValiusSciences/abstract-sift/releases/tag/esmo2026-corpus-v2) | [TSV](https://github.com/ValiusSciences/abstract-sift/releases/download/esmo2026-corpus-v2/esmo2026-abstracts.tsv) | [ESMO](docs/ESMO_RUN.md) |
+| SITC 2026 | 1,127 / 1,126 | Corpus, two-provider scores and offline explorer | Includes 19 late-breaking abstracts; one withdrawn entry | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/sitc2026-corpus-v1) | [TSV](https://github.com/ValiusSciences/abstract-sift/releases/download/sitc2026-corpus-v1/sitc2026-abstracts.tsv) | [SITC](docs/SITC_RUN.md) |
+| ASH 2026 | 6,376 / 6,376 | Corpus, two-provider scores and offline explorer; unchanged solid-tumor criteria | Includes six plenary abstracts. **Late-breaking abstracts are not included yet** (scheduled December 7, 2026). | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/ash2026-corpus-v1) | [TSV](https://github.com/ValiusSciences/abstract-sift/releases/download/ash2026-corpus-v1/ash2026-abstracts.tsv) | [ASH](docs/ASH_RUN.md) |
+| ACR Convergence 2026 | 2,995 / 2,988 | **Unscored** corpus and metadata; no oncology criteria applied | Includes 22 late-breaking and 17 patient-perspective abstracts; seven withdrawn entries | [v1](https://github.com/ValiusSciences/abstract-sift/releases/tag/acr2026-corpus-v1) | [TSV](https://github.com/ValiusSciences/abstract-sift/releases/download/acr2026-corpus-v1/acr2026-abstracts.tsv) | [ACR](docs/ACR_RUN.md) |
 
-Each release includes provenance and checksums. ACR requires a new rheumatology-specific research question before scoring. Private TRACE annotations and scientist votes are not included in these release bundles.
+Each release includes provenance and checksums. The unscored TSVs have the same five fields as the JSONL corpora (`id`, `title`, `authors`, `full_text`, `link`); no scores or TRACE tags are included. Plain and gzip-compressed TSVs are attached to each release with `TSV_GUIDE.md` and `TSV_SHA256SUMS`. Import IDs as text to preserve leading zeros; quoted fields retain multiline abstract text. ACR requires a new rheumatology-specific research question before scoring. Private TRACE annotations and scientist votes are not included in these release bundles.
 
 ## Terminal output and progress
 
